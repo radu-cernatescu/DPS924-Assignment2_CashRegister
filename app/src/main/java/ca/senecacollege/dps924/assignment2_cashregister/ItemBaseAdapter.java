@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 
 public class ItemBaseAdapter extends BaseAdapter {
@@ -33,7 +35,7 @@ public class ItemBaseAdapter extends BaseAdapter {
 
     public Item getItemByName(String name) {
         for (Item item: items) {
-            if (item.product_type == name) {
+            if (item.product_type.equals(name)) {
                 return item;
             }
         }
@@ -54,7 +56,10 @@ public class ItemBaseAdapter extends BaseAdapter {
         TextView productQuantity = view.findViewById(R.id.list_product_quantity);
 
         productType.setText(items.get(i).product_type);
-        productCost.setText(String.valueOf(items.get(i).amount));
+        DecimalFormat decimalFormat = (DecimalFormat) NumberFormat.getCurrencyInstance();
+        decimalFormat.setMinimumFractionDigits(2);
+        String totalCostFormatted = decimalFormat.format(items.get(i).amount);
+        productCost.setText(totalCostFormatted);
         productQuantity.setText(String.valueOf(items.get(i).quantity));
 
         return view;

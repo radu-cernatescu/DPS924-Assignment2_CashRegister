@@ -1,9 +1,11 @@
 package ca.senecacollege.dps924.assignment2_cashregister;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -15,7 +17,14 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.lang.reflect.Array;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -29,11 +38,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TextView productTypeText;
 
     ArrayList<Item> itemArray;
+    ArrayList<Item> purchasedItems;
+    ItemManager manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        manager = ((MyApp)getApplication()).manager;
 
         itemList = findViewById(R.id.item_list);
         totalText = findViewById(R.id.total_text);
@@ -46,12 +58,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         buyBtn.setOnClickListener(this);
         managerBtn.setOnClickListener(this);
 
-        itemArray = new ArrayList<>();
-        itemArray.add(new Item(3.99, "Berries", 75));
-        itemArray.add(new Item(4.99, "Cherries", 15));
-        itemArray.add(new Item(14.99, "Vodka", 25));
-        itemArray.add(new Item(19.99, "Rum", 5));
-
+        purchasedItems = new ArrayList<>();
+        itemArray = manager.allItems;
         adapter = new ItemBaseAdapter(itemArray, this);
         itemList.setAdapter(adapter);
 
@@ -73,7 +81,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 quantityText.setText(String.valueOf(i1));
                 if (temp != null) {
                     double totalCost = temp.amount * i1;
-                    totalText.setText(String.valueOf(totalCost));
+                    DecimalFormat decimalFormat = new DecimalFormat();
+                    decimalFormat.setMinimumFractionDigits(2);
+                    String totalCostFormatted = decimalFormat.format(totalCost);
+                    totalText.setText(totalCostFormatted);
                 }
             }
         });
@@ -82,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         numberPicker.setMaxValue(99);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onClick(View view) {
         int id = view.getId();
@@ -95,11 +107,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Toast.makeText(this, "Error: Not enough quantity in stock!", Toast.LENGTH_SHORT).show();
                 }
                 else {
+                    int amtPurchased = Integer.parseInt(quantityText.getText().toString());
+                    double totalCost = Double.parseDouble(totalText.getText().toString());
+                    DecimalFormat decimalFormat = (DecimalFormat) NumberFormat.getCurrencyInstance();
+                    decimalFormat.setMinimumFractionDigits(2);
+                    String totalCostFormatted = decimalFormat.format(totalCost);
+                    String productType = productTypeText.getText().toString();
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    manager.addPurchasedItem(new Item(totalCost, productType, amtPurchased, LocalDateTime.now().format(formatter).toString()));
                     AlertDialog.Builder alert = new AlertDialog.Builder(this);
                     alert.setTitle("Thank You for your purchase!");
-                    alert.setMessage("Your purchase is " + quantityText.getText().toString() + " " + productTypeText.getText().toString() + " for " + totalText.getText().toString());
+                    alert.setMessage("Your purchase is " + quantityText.getText().toString() + " " + productType + " for " + totalCostFormatted);
                     alert.show();
-                    currentItem.quantity -= Integer.parseInt(quantityText.getText().toString());
+                    currentItem.quantity -= amtPurchased;
                     adapter.notifyDataSetChanged();
                     productTypeText.setText("Please tap an item below...");
                     numberPicker.setValue(0);
@@ -110,11 +130,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             case R.id.manager_btn:
                 Intent myIntent = new Intent(this, ManagerPanelActivity.class);
-                myIntent.putExtra("items", itemArray);
                 startActivity(myIntent);
                 break;
         }
     }
-
-
 }
