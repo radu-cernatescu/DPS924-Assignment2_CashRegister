@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Assignment 2 - Cash Register</string>
+    <string name="product_type_placeholder">Please tap an item below...</string>
+    <string name="quantity_placeholder">0</string>
+    <string name="total_cost_placeholder">Total</string>
+    <string name="buy">Buy</string>
+    <string name="manager">Manager</string>
+    <string name="product_type">product type</string>
+    <string name="quantity">quantity</string>
+    <string name="cost">cost</string>
+    <string name="history">History</string>
+    <string name="restock">Restock</string>
+</resources>
