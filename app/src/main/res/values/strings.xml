@@ -10,4 +10,10 @@
     <string name="cost">cost</string>
     <string name="history">History</string>
     <string name="restock">Restock</string>
+    <string name="product">Product:</string>
+    <string name="price">Price:</string>
+    <string name="purchase_date">Purchase Date:</string>
+    <string name="enter_new_quantity">Enter new quantity</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
 </resources>
